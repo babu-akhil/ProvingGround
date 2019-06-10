@@ -1100,11 +1100,15 @@ object HoTT {
       */
     def induc[W <: Term with Subs[W]](
         targetFmly: Func[U, Func[V, Typ[W]]]
-    ): Func[FuncLike[U, FuncLike[V, W]], FuncLike[PairTerm[U, V], W]] = {
+    ) = {
       val xy     = prod.Var
       val (x, y) = (xy.first, xy.second)
       val d      = (x ~>: (y ~>: targetFmly(x)(y))).Var
-      d :-> (InducFn(targetFmly, d): FuncLike[PairTerm[U, V], W])
+      if ((targetFmly(x)(y).dependsOn(x)==false) && (targetFmly(x)(y).dependsOn(y)==false)) 
+      {val dd = (first ->: second ->: targetFmly(x)(y)).Var
+        dd :-> (RecFn(targetFmly(x)(y), dd): Func[PairTerm[U,V],W])
+      }
+      else {d :-> (InducFn(targetFmly, d): FuncLike[PairTerm[U, V], W])}
     }
   }
 
